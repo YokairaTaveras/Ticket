@@ -7,10 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="BLL\" />
     <Folder Include="Data\" />
     <Folder Include="Extensors\" />
-    <Folder Include="Pages\Consultas\" />
     <Folder Include="Pages\Registro\" />
   </ItemGroup>
 
