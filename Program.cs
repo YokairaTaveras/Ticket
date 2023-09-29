@@ -1,8 +1,15 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Ticket.Data;
+using Microsoft.EntityFrameworkCore;
+using Ticket.DAL;
+
 
 var builder = WebApplication.CreateBuilder(args);
+
+var ConStr = builder.Configuration.GetConnectionString("ConStr");
+
+builder.Services.AddDbContext<Context>(Options => Options.UseSqlite(ConStr));
 
 // Add services to the container.
 builder.Services.AddRazorPages();
