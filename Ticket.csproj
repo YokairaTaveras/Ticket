@@ -7,7 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="DAL\" />
     <Folder Include="BLL\" />
     <Folder Include="Extensors\" />
     <Folder Include="Pages\Consultas\" />
