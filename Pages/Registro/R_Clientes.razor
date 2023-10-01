@@ -1,0 +1,202 @@
+﻿@page "/Cliente"
+@page "/Cliente/{ClienteId:int}"
+@inject ClientesBLL ClientesBLL
+@inject NotificationService notificationService
+
+
+<PageTitle>Registro Clientes</PageTitle>
+
+<EditForm Model="Cliente" OnValidSubmit="Guardar">
+    <DataAnnotationsValidator />
+    <div class="card">
+        <div class="card-header">
+            <h1> Registro de Clientes</h1>
+        </div>
+        <div class="card-body">
+
+            <div class="row">
+                <div class="col-3">
+                        <label>Id: </label>
+                            <input type="number" class="form-control" @bind-value="Cliente.ClienteId">
+                        </div>
+                        <div class="col-3 d-flex align-items-end">
+                            <button type="button" class="btn btn-primary" @onclick="Buscar">
+                                <span class="oi oi-magnifying-glass"></span>
+                            </button>
+                    </div>
+             </div>
+             <div class="row">
+                        <div class="col-6">
+                            @*Nombre*@
+                            <label>Nombre: </label>
+                            <InputText @bind-Value="Cliente.Nombre" class="form-control" />
+                            <ValidationMessage For="@(() => Cliente.Nombre)" />
+                        </div>
+                        <div class="col-6">
+                            @*Teléfono*@
+                            <label>Telefono: </label>
+                            <InputText @bind-Value="Cliente.Telefono" class="form-control" />
+                            <ValidationMessage For="@(() => Cliente.Telefono)" />
+                        </div>
+             </div>
+             <div class="row">
+                        <div class="col-6">
+                            @*Celular*@
+                            <label>Celular: </label>
+                            <InputText @bind-Value="Cliente.Celular" class="form-control" />
+                            <ValidationMessage For="@(() => Cliente.Celular)" />
+                        </div>
+                        <div class="col-6">
+                            @*RNC*@
+                            <label>RNC: </label>
+                            <InputText @bind-Value="Cliente.RNC" class="form-control" />
+                            <ValidationMessage For="@(() => Cliente.RNC)" />
+                        </div>
+             </div>
+             <div class="row">
+                        <div class="col-6">
+                            @*Email*@
+                            <label>Email: </label>
+                            <InputText @bind-Value="Cliente.Email" class="form-control" />
+                            <ValidationMessage For="@(() => Cliente.Email)" />
+                        </div>
+                        <div class="col-6">
+                            @*Dirección*@
+                            <label>Dirección: </label>
+                            <InputText @bind-Value="Cliente.Direccion" class="form-control" />
+                            <ValidationMessage For="@(() => Cliente.Direccion)" />
+                        </div>
+                    </div>
+        </div>
+        <div class="card-footer">
+            <button type="button" class="btn btn-primary" @onclick="Nuevo">
+                <span class="oi oi-file"></span>Nuevo
+            </button>
+            <button type="submit" class="btn btn-success">
+                <span class="oi oi-document"></span>Guardar
+            </button>
+            <button type="button" class="btn btn-danger" @onclick="Eliminar">
+                <span class="oi oi-delete"></span>Eliminar
+            </button>
+        </div>
+    </div>
+    
+</EditForm>
+
+
+@code {
+    [Parameter]
+    public int? ClienteId { get; set; }
+    public Clientes Cliente { get; set; } = new Clientes();
+    public string mensaje { get; set; } = "";
+
+    protected override void OnInitialized()
+    {
+        if (ClienteId.HasValue)
+        {
+            Cliente.ClienteId = ClienteId.Value;
+            Buscar();
+        }
+    }
+
+    public void Buscar()
+    {
+        var ClienteEncontrado = ClientesBLL.Buscar(Cliente.ClienteId);
+        if (ClienteEncontrado != null)
+        {
+            Cliente = ClienteEncontrado;
+        }
+    }
+
+    public void Nuevo()
+    {
+        Cliente = new Clientes();
+    }
+
+    public void Guardar()    
+     {
+        if(ClientesBLL.VerificarExistencia(this.Cliente) == false)
+        {
+
+            var mensaje = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "Validacion",
+                    Detail = "Error el RNC o el nombre del usuario ya ha sido registrado",
+                    Duration = 4_000
+                };
+            notificationService.Notify(mensaje);
+            return;
+        }
+        
+        if (!Validar())
+        {
+            var mensaje = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "Validacion",
+                    Detail = "Error revise los campos",
+                    Duration = 4_000
+                };
+            notificationService.Notify(mensaje);
+            return;
+        }
+        var guardo = ClientesBLL.Guardar(this.Cliente);
+        if (guardo)
+        {
+            var mensaje = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "Exito",
+                    Detail = "Guardado correctamente",
+                    Duration = 4_000
+                };
+            notificationService.Notify(mensaje);
+            Nuevo();
+        }
+        else
+        {
+            var mensaje = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "Error",
+                    Detail = "Ocurrio un error y no fue posible guardar",
+                    Duration = 4_000
+                };
+            notificationService.Notify(mensaje);
+        }
+    }
+    public void Eliminar()
+     {
+        Buscar();
+        if (ClientesBLL.Eliminar(this.Cliente.ClienteId))
+        {
+            var mensaje = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "Exito",
+                    Detail = "Eliminado con exito",
+                    Duration = 4_000
+                };
+            notificationService.Notify(mensaje);
+            Nuevo();
+        }
+        else
+        {
+            var mensaje = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "Error",
+                    Detail = "Ocurrio un error y no fue posible guardar",
+                    Duration = 4_000
+                };
+            notificationService.Notify(mensaje);
+        }
+
+    }
+    bool Validar()
+    {
+        //todo: Validar que el nombre del sistema no este repetido.
+        return true;
+    }
+}

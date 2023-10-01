@@ -1,0 +1,206 @@
+﻿@page "/Ticket"
+@page "/Ticket/{TicketId:int}"
+@inject TicketsBLL TicketsBLL
+@inject ClientesBLL ClientesBLL
+@inject NotificationService notificationService
+
+
+<PageTitle>Registro Tickets</PageTitle>
+
+<EditForm Model="Ticket" OnValidSubmit="Guardar">
+    <DataAnnotationsValidator />
+    <div class="card">
+        <div class="card-header">
+            <h1> Registro de Tickets</h1>
+        </div>
+        <div class="card-body">
+
+            <div class="row">
+                <div class="col-3">
+                    <label>Id: </label>
+                    <input type="number" class="form-control" @bind-value="Ticket.TicketId">
+                </div>
+                <div class="col-3 d-flex align-items-end">
+                    <button type="button" class="btn btn-primary" @onclick="Buscar">
+                        <span class="oi oi-magnifying-glass"></span>
+                    </button>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-6">
+                    @*Fecha*@
+                    <label>Fecha: </label>
+                    <InputDate @bind-Value="Ticket.Fecha" class="form-control" />
+                    <ValidationMessage For="@(() => Ticket.Fecha)" />
+                </div>
+                <div class="col-6">
+                    @*ClienteId*@
+                    <label>ClienteId: </label>
+                    <InputNumber @bind-Value="Ticket.ClienteId" class="form-control" />
+                    <ValidationMessage For="@(() => Ticket.ClienteId)" />
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-6">
+                    @*SistemaId*@
+                    <label>SistemaId: </label>
+                    <InputNumber @bind-Value="Ticket.SistemaId" class="form-control" />
+                    <ValidationMessage For="@(() => Ticket.SistemaId)" />
+                </div>
+                <div class="col-6">
+                    @*SolicitadoPor*@
+                    <label>SolicitadoPor: </label>
+                    <InputText @bind-Value="Ticket.SolicitadoPor" class="form-control" />
+                    <ValidationMessage For="@(() => Ticket.SolicitadoPor)" />
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-6">
+                    @*Asunto*@
+                    <label>Asunto: </label>
+                    <InputText @bind-Value="Ticket.Asunto" class="form-control" />
+                    <ValidationMessage For="@(() => Ticket.Asunto)" />
+                </div>
+                <div class="col-6">
+                    @*Descripción*@
+                    <label>Descripción: </label>
+                    <InputText @bind-Value="Ticket.Descripcion" class="form-control" />
+                    <ValidationMessage For="@(() => Ticket.Descripcion)" />
+                </div>
+            </div>
+        </div>
+        <div class="card-footer">
+            <button type="button" class="btn btn-primary" @onclick="Nuevo">
+                <span class="oi oi-file"></span>Nuevo
+            </button>
+            <button type="submit" class="btn btn-success">
+                <span class="oi oi-delete"></span>Guardar
+            </button>
+            <button type="button" class="btn btn-danger" @onclick="Eliminar">
+                <span class="oi oi-document"></span>Eliminar
+            </button>
+        </div>
+    </div>
+
+</EditForm>
+
+
+@code {
+    [Parameter]
+    public int? TicketId { get; set; }
+    public Tickets Ticket { get; set; } = new Tickets();
+    public string mensaje { get; set; } = "";
+
+    public List<Clientes> ListaClientes = new List<Clientes>();
+
+    protected override void OnInitialized()
+    {
+        if (TicketId.HasValue)
+        {
+            Ticket.TicketId = TicketId.Value;
+            Buscar();
+        }
+    }
+
+    public void Buscar()
+    {
+        var TicketEncontrado = TicketsBLL.Buscar(Ticket.TicketId);
+        if (TicketEncontrado != null)
+        {
+            Ticket = TicketEncontrado;
+        }
+    }
+
+    public void Nuevo()
+    {
+        Ticket = new Tickets();
+    }
+
+    public void Guardar()
+
+    {
+        if (TicketsBLL.VerificarExistencia(this.Ticket) == false)
+        {
+
+            var mensaje = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "Validacion",
+                    Detail = "Error el RNC o el nombre del usuario ya ha sido registrado",
+                    Duration = 4_000
+                };
+            notificationService.Notify(mensaje);
+            return;
+        }
+
+        if (!Validar())
+        {
+            var mensaje = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "Validacion",
+                    Detail = "Error revise los campos",
+                    Duration = 4_000
+                };
+            notificationService.Notify(mensaje);
+            return;
+        }
+
+        var guardo = TicketsBLL.Guardar(this.Ticket);
+        if (guardo)
+        {
+            var mensaje = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "Exito",
+                    Detail = "Guardado correctamente",
+                    Duration = 4_000
+                };
+            notificationService.Notify(mensaje);
+            Nuevo();
+        }
+        else
+        {
+            var mensaje = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "Error",
+                    Detail = "Ocurrio un error y no fue posible guardar",
+                    Duration = 4_000
+                };
+            notificationService.Notify(mensaje);
+        }
+    }
+
+    public void Eliminar()
+    {
+        Buscar();
+        if (TicketsBLL.Eliminar(this.Ticket.TicketId))
+        {
+            var mensaje = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "Exito",
+                    Detail = "Eliminado con exito",
+                    Duration = 4_000
+                };
+            notificationService.Notify(mensaje);
+            Nuevo();
+        }
+        else
+        {
+            var mensaje = new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "Error",
+                    Detail = "Ocurrio un error y no fue posible guardar",
+                    Duration = 4_000
+                };
+            notificationService.Notify(mensaje);
+        }
+    }
+
+    bool Validar() =>
+        //todo: Validar que el nombre del sistema no este repetido.
+        true;
+}

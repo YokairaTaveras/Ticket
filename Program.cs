@@ -3,7 +3,8 @@ using Microsoft.AspNetCore.Components.Web;
 using Ticket.Data;
 using Microsoft.EntityFrameworkCore;
 using Ticket.DAL;
-
+using Ticket.BLL;
+using Radzen;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,6 +16,14 @@ builder.Services.AddDbContext<Context>(Options => Options.UseSqlite(ConStr));
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddSingleton<WeatherForecastService>();
+
+builder.Services.AddScoped<PrioridadesBLL>();
+builder.Services.AddScoped<ClientesBLL>();
+builder.Services.AddScoped<TicketsBLL>();
+builder.Services.AddScoped<NotificationService>();
+// Add services to the container.
+builder.Services.AddRazorPages();
+builder.Services.AddServerSideBlazor();
 
 var app = builder.Build();
 
