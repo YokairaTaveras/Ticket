@@ -11,8 +11,8 @@ using Ticket.DAL;
 namespace Ticket.Migrations
 {
     [DbContext(typeof(Context))]
-    [Migration("20230929203126_inicial")]
-    partial class inicial
+    [Migration("20231001225119_Inicial")]
+    partial class Inicial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
